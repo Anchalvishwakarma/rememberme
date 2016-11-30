@@ -48,7 +48,7 @@ class PersistenceLogin {
      * username private variable
      * come from browser
      */
-    private $cookie_username;
+    private $cookie_useremail;
 
 
     /*
@@ -77,8 +77,7 @@ class PersistenceLogin {
 
     public function __construct() {
         $this->CI = & get_instance();
-        $this->CI->load->model('Users_model');
-        $this->CI->load->model('bu_model');
+        $this->CI->load->model('Users');// assueming users module to check user with DB
         $this->CI->load->helper('cookie');
         $this->CI->load->library('encrypt');
         $this->input_array = $this->CI->input->post();
@@ -120,7 +119,7 @@ class PersistenceLogin {
     public function isUserExist() {
         $this->CI->db->select('*');
         $this->CI->db->from('users');
-        $this->CI->db->where('users.user_name', $this->input_array['user_name']);
+        $this->CI->db->where('users.user_email', $this->input_array['user_email']);
         $query = $this->CI->db->get();
         $this->is_user_exist = ($query->num_rows() == 1) ? TRUE : FALSE;
     }
@@ -146,7 +145,7 @@ class PersistenceLogin {
                     'token' => $this->token,
                 );
 
-                $this->CI->db->where('user_name', $this->input_array['user_name']);
+                $this->CI->db->where('user_email', $this->input_array['user_email']);
                 $this->CI->db->update('users', $userData);
             }
         } else {
@@ -163,7 +162,7 @@ class PersistenceLogin {
      * */
 
     public function generateTokenAndIdentifires() {
-        $this->identifier = md5($this->input_array['user_name']);
+        $this->identifier = md5($this->input_array['user_email']);
         $this->token = hash('sha512', $this->hash);
     }
 
@@ -181,7 +180,7 @@ class PersistenceLogin {
             'token' => NULL,
         );
 
-        $this->CI->db->where('user_name', $this->CI->session->userdata('user_name'));
+        $this->CI->db->where('user_email', $this->CI->session->userdata('user_email'));
         $this->CI->db->update('users', $userData);
     }
 
@@ -213,7 +212,7 @@ class PersistenceLogin {
 
     public function decodeAndSetCookieValue() {
         $cookieArray = explode('-', $this->CI->encrypt->decode($this->cookieValue));
-        $this->cookie_username = $cookieArray[0];
+        $this->cookie_useremail = $cookieArray[0];
         $this->cookie_identifier = $cookieArray[1];
         $this->cookie_token = $cookieArray[2];
     }
@@ -250,33 +249,8 @@ class PersistenceLogin {
      * */
 
     public function setUserDataToSession() {
-        $user_details = $this->userData[0];
-        $other_bu_project = NULL;
-        $user_rights = $this->CI->Users_model->get_user_rights($user_details['ID']);
-
-        if ($user_details['ID'] != 1) {
-            //get user BU Detail
-            $bu_info = $this->CI->bu_model->get_user_bu($user_details['ID']);
-            $bu_id = $bu_info['bu_id'];
-            $bu_category = $bu_info['bu_category'];
-            //get sharable project's detail
-            $other_bu_project = $this->CI->Users_model->get_other_bu_project_as_assing_sharable($user_details['ID'], $bu_id);
-        } else {
-            $bu_id = -1;
-        }
-        $data = array(
-            'user_name' => $user_details['user_name'],
-            'user_id' => $user_details['ID'],
-            'user_fname' => $user_details['first_name'],
-            'is_logged_in' => true,
-            'bu_id' => $bu_id,
-            'user_role' => $user_details['type'],
-            'rights' => $user_rights,
-            'sharable_project_data' => $other_bu_project,
-            'bu_category' => $bu_category
-        );
-
-        $this->CI->session->set_userdata($data);
+        //set user data into session after login
+        $this->CI->session->set_userdata($this->userData[0]);
     }
 
 }
