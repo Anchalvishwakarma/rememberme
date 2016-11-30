@@ -3,7 +3,7 @@ Codeigniter library to enable rememberme  functionality for 1 day
 
 3 function which we have to use in our code to enable this feature.
 
- 1) isRememberMe():-  call isRememberMe() function after valid user check, it will check that user comes with remember me checkbox checked or not on the basis of that it will set persistance cookie for one day you can change cookie lifetime as you want at set_cookie() function. 
+ 1) isRememberMe():-  call isRememberMe() function after valid user check, it will check that user comes with remember me checkbox checked or not on the basis of that it will set persistance cookie for one day you can change cookie lifetime as you want at set_cookie() function.<br/>
     e.g  if(user === valid){
            $this->persistencelogin->isRememberMe();
            // your code here goes down
