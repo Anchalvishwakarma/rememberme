@@ -99,7 +99,6 @@ class PersistenceLogin {
         );
         set_cookie($cookieData);
     }
-
     /*
      * Get Cookie forom browser
      * set class variable :  $this->cookieValue
